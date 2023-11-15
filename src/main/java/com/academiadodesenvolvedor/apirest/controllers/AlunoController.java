@@ -1,6 +1,7 @@
 package com.academiadodesenvolvedor.apirest.controllers;
 
 import com.academiadodesenvolvedor.apirest.dtos.AlunoDTO;
+import com.academiadodesenvolvedor.apirest.exceptions.ResourceNotFoundException;
 import com.academiadodesenvolvedor.apirest.models.Aluno;
 import com.academiadodesenvolvedor.apirest.repository.AlunoRepository;
 import com.academiadodesenvolvedor.apirest.requests.CreateAlunoRequest;
@@ -39,5 +40,32 @@ public class AlunoController {
                 .toList();
 
         return new ResponseEntity<>(alunos, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AlunoDTO> getById(@PathVariable Long id) {
+        Aluno aluno = this.alunoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Aluno não encontrado"));
+        return new ResponseEntity<>(new AlunoDTO(aluno), HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AlunoDTO> update(@PathVariable Long id,
+                                           @RequestBody CreateAlunoRequest request) {
+        Aluno aluno = this.alunoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Aluno não encontrado"));
+        this.alunoRepository.save(request.update(aluno));
+
+        return new ResponseEntity<>(new AlunoDTO(aluno), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity delete(@PathVariable Long id) {
+        Aluno aluno = this.alunoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Aluno não encontrado"));
+
+        this.alunoRepository.delete(aluno);
+        
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

@@ -28,4 +28,11 @@ public class CreateAlunoRequest {
         aluno.setEmail(this.email);
         return aluno;
     }
+
+    public Aluno update(Aluno aluno) {
+        if (this.cpf != null) aluno.setCpf(this.cpf);
+        if (this.nome != null) aluno.setNome(this.nome);
+        if (this.email != null) aluno.setEmail(this.email);
+        return aluno;
+    }
 }

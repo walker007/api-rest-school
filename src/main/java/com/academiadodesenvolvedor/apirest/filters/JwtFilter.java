@@ -34,21 +34,24 @@ public class JwtFilter extends OncePerRequestFilter {
 
             String token = authorizationHeader.split(" ")[1];
             boolean tokenIsValid = this.jwtService.tokenIsValid(token);
-            if (tokenIsValid) {
+            try {
                 String email = this.jwtService.decode(token)
                         .getClaim("email")
                         .asString();
-                UserDetails user = this.userService.loadUserByUsername(email);
-                UsernamePasswordAuthenticationToken authenticatedUser =
-                        new UsernamePasswordAuthenticationToken(
-                                user, null, null
-                        );
 
-                authenticatedUser
-                        .setDetails(new WebAuthenticationDetailsSource()
-                                .buildDetails(request));
-                SecurityContextHolder.getContext()
-                        .setAuthentication(authenticatedUser);
+                if (tokenIsValid) {
+                    UserDetails user = this.userService.loadUserByUsername(email);
+                    UsernamePasswordAuthenticationToken authenticatedUser =
+                            new UsernamePasswordAuthenticationToken(
+                                    user, null, null
+                            );
+                    authenticatedUser
+                            .setDetails(new WebAuthenticationDetailsSource()
+                                    .buildDetails(request));
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(authenticatedUser);
+                }
+            } catch (Exception e) {
             }
         }
 

@@ -32,11 +32,12 @@ public class ConfiguracaoSeguranca {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.POST, "/login/create")
+                        .requestMatchers(HttpMethod.POST, "/login/**")
                         .permitAll()
-                        .requestMatchers(HttpMethod.POST, "/login")
+                        .requestMatchers(HttpMethod.GET, "/cursos")
                         .permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest()
+                        .authenticated()
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

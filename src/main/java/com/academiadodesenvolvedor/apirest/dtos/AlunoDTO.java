@@ -13,7 +13,7 @@ public class AlunoDTO {
     public AlunoDTO(Aluno aluno) {
         this.nome = aluno.getNome();
         this.email = aluno.getEmail();
-        this.cpf = aluno.getNome();
+        this.cpf = aluno.getCpf();
         this.id = aluno.getId();
     }
 }

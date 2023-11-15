@@ -8,7 +8,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -22,15 +21,15 @@ public class JwtService {
     @Value("${app.jwt.secret}")
     private String assinatura;
 
-    private Algorithm jwtAlgorithm() throws UnsupportedEncodingException {
+    private Algorithm jwtAlgorithm() throws Exception {
         return Algorithm.HMAC256(this.assinatura);
     }
 
-    public JWTVerifier verifier() throws UnsupportedEncodingException {
+    public JWTVerifier verifier() throws Exception {
         return JWT.require(this.jwtAlgorithm()).build();
     }
 
-    public DecodedJWT decode(String token) throws UnsupportedEncodingException {
+    public DecodedJWT decode(String token) throws Exception {
         return this.verifier().verify(token);
     }
 
@@ -48,9 +47,9 @@ public class JwtService {
         }
     }
 
-    public String generateToken(Usuario usuario) throws UnsupportedEncodingException {
+    public String generateToken(Usuario usuario) throws Exception {
         LocalDateTime expirationSeconds = LocalDateTime.now()
-                .plusSeconds(Long.parseLong(this.expiracao));
+                .plusMinutes(Long.parseLong(this.expiracao));
         Date expiration = Date.from(expirationSeconds
                 .atZone(ZoneId.systemDefault())
                 .toInstant());
