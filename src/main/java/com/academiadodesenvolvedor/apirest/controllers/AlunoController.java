@@ -3,11 +3,15 @@ package com.academiadodesenvolvedor.apirest.controllers;
 import com.academiadodesenvolvedor.apirest.dtos.AlunoDTO;
 import com.academiadodesenvolvedor.apirest.dtos.CursoDTO;
 import com.academiadodesenvolvedor.apirest.exceptions.ResourceNotFoundException;
+import com.academiadodesenvolvedor.apirest.exceptions.ValidateFailException;
 import com.academiadodesenvolvedor.apirest.models.Aluno;
 import com.academiadodesenvolvedor.apirest.models.Curso;
+import com.academiadodesenvolvedor.apirest.models.Documentos;
 import com.academiadodesenvolvedor.apirest.repository.AlunoRepository;
 import com.academiadodesenvolvedor.apirest.repository.CursoRepository;
+import com.academiadodesenvolvedor.apirest.repository.DocumentsRepository;
 import com.academiadodesenvolvedor.apirest.requests.CreateAlunoRequest;
+import com.academiadodesenvolvedor.apirest.requests.DocumentsRequest;
 import com.academiadodesenvolvedor.apirest.requests.EnrollRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,12 +28,16 @@ public class AlunoController {
 
     private final AlunoRepository alunoRepository;
     private final CursoRepository cursoRepository;
+    private final DocumentsRepository documentsRepository;
+
 
     @Autowired
     public AlunoController(AlunoRepository repository,
-                           CursoRepository cursoRepository) {
+                           CursoRepository cursoRepository,
+                           DocumentsRepository documentsRepository) {
         this.alunoRepository = repository;
         this.cursoRepository = cursoRepository;
+        this.documentsRepository = documentsRepository;
     }
 
     @PostMapping
@@ -93,10 +101,10 @@ public class AlunoController {
             return new ResponseEntity(new CursoDTO(curso), HttpStatus.OK);
         }
 
-        if (curso.getAlunos().stream()
+        if (!curso.getAlunos().stream()
                 .filter(aluno1 -> aluno1.getId() == aluno.getId())
-                .toList().size() > 0) {
-            throw new RuntimeException("Aluno já matriculado neste curso");
+                .toList().isEmpty()) {
+            throw new ValidateFailException("Aluno já matriculado neste curso.");
         }
 
         List<Aluno> alunoList = curso.getAlunos();
@@ -104,5 +112,24 @@ public class AlunoController {
         curso.setAlunos(alunoList);
         this.cursoRepository.save(curso);
         return new ResponseEntity(new CursoDTO(curso), HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/documentos")
+    private ResponseEntity<AlunoDTO> documents(@PathVariable Long id,
+                                               @RequestBody DocumentsRequest request) {
+        Aluno aluno = this.alunoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Aluno não encontrado"));
+
+        if (aluno.getDocumentos() == null) {
+            Documentos documentos = request.convert();
+            this.documentsRepository.save(documentos);
+            aluno.setDocumentos(documentos);
+            this.alunoRepository.save(aluno);
+            return new ResponseEntity<>(new AlunoDTO(aluno), HttpStatus.OK);
+        }
+
+        aluno.setDocumentos(request.update(aluno.getDocumentos()));
+        this.alunoRepository.save(aluno);
+        return new ResponseEntity<>(new AlunoDTO(aluno), HttpStatus.OK);
     }
 }

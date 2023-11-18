@@ -17,4 +17,7 @@ public class Aluno {
     private String cpf;
     @ManyToMany(mappedBy = "alunos")
     private List<Curso> cursos;
+    @OneToOne
+    @JoinColumn(name = "documento_id")
+    private Documentos documentos;
 }
