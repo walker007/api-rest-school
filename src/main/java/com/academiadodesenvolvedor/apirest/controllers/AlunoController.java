@@ -7,10 +7,13 @@ import com.academiadodesenvolvedor.apirest.exceptions.ValidateFailException;
 import com.academiadodesenvolvedor.apirest.models.Aluno;
 import com.academiadodesenvolvedor.apirest.models.Curso;
 import com.academiadodesenvolvedor.apirest.models.Documentos;
+import com.academiadodesenvolvedor.apirest.models.Nota;
 import com.academiadodesenvolvedor.apirest.repository.AlunoRepository;
 import com.academiadodesenvolvedor.apirest.repository.CursoRepository;
 import com.academiadodesenvolvedor.apirest.repository.DocumentsRepository;
+import com.academiadodesenvolvedor.apirest.repository.NotaRepository;
 import com.academiadodesenvolvedor.apirest.requests.CreateAlunoRequest;
+import com.academiadodesenvolvedor.apirest.requests.CreateNotaRequest;
 import com.academiadodesenvolvedor.apirest.requests.DocumentsRequest;
 import com.academiadodesenvolvedor.apirest.requests.EnrollRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,15 +32,17 @@ public class AlunoController {
     private final AlunoRepository alunoRepository;
     private final CursoRepository cursoRepository;
     private final DocumentsRepository documentsRepository;
-
+    private final NotaRepository notaRepository;
 
     @Autowired
     public AlunoController(AlunoRepository repository,
                            CursoRepository cursoRepository,
-                           DocumentsRepository documentsRepository) {
+                           DocumentsRepository documentsRepository,
+                           NotaRepository notaRepository) {
         this.alunoRepository = repository;
         this.cursoRepository = cursoRepository;
         this.documentsRepository = documentsRepository;
+        this.notaRepository = notaRepository;
     }
 
     @PostMapping
@@ -131,5 +136,18 @@ public class AlunoController {
         aluno.setDocumentos(request.update(aluno.getDocumentos()));
         this.alunoRepository.save(aluno);
         return new ResponseEntity<>(new AlunoDTO(aluno), HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/nota")
+    public ResponseEntity<AlunoDTO> nota(@PathVariable Long id,
+                                         @RequestBody CreateNotaRequest request) {
+        Aluno aluno = this.alunoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Aluno não encontrado"));
+
+        Nota nota = request.convert();
+        nota.setAluno(aluno);
+        this.notaRepository.save(nota);
+
+        return new ResponseEntity<>(new AlunoDTO(aluno), HttpStatus.CREATED);
     }
 }

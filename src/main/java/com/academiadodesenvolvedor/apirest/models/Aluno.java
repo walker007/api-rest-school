@@ -20,4 +20,7 @@ public class Aluno {
     @OneToOne
     @JoinColumn(name = "documento_id")
     private Documentos documentos;
+
+    @OneToMany(mappedBy = "aluno")
+    private List<Nota> notas;
 }
