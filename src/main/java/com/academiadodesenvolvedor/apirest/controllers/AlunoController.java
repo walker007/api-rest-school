@@ -39,10 +39,12 @@ public class AlunoController {
                            CursoRepository cursoRepository,
                            DocumentsRepository documentsRepository,
                            NotaRepository notaRepository) {
+
         this.alunoRepository = repository;
         this.cursoRepository = cursoRepository;
         this.documentsRepository = documentsRepository;
         this.notaRepository = notaRepository;
+        
     }
 
     @PostMapping
